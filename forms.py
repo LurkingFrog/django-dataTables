@@ -53,8 +53,14 @@ class JQueryDataTable(forms.Form):
         if len(classes) == 1:
             return classes[0](*args, **kwargs)
 
-        else:
+        elif len(classes) == 0:
             raise ValueError("'{0}' Is not a valid class".format(table_type))
+
+        else:
+            raise ValueError(
+                "'{0}' matched multiple records: {1}"
+                .format(table_type, classes)
+            )
 
     def add_data(self):
         new_row = SortedDict()
@@ -86,6 +92,7 @@ class JQueryDataTable(forms.Form):
         context = {
             "aaData": list(),
             "aoColumns": list(),
+            "buttons": list()
         }
         
         context['aoColumns'] = [
@@ -101,6 +108,8 @@ class JQueryDataTable(forms.Form):
                 [unicode(x) for x in row.values()]
             )
 
+        context['buttons'] = [x.dump for x in self.buttons]
+
         return simplejson.dumps(context)
 
 
@@ -111,13 +120,47 @@ class DTColumn(object):
 
     def __init__(self, label):
         self.label = label
-        pass
+        
+        # TODO: Add filter options
+        # TODO: Add formatting options
+        # TODO: Add link options
 
 
 class DTButton(object):
     """
     A button to be displayed at the battom of the data table
-    """
-    def __init__(self, label):
-        pass
 
+    label: the text shown on the button
+    action_type: what kind of action is performed when clicked
+        JUMP_TO_VIEW (default)
+        TODO: OPEN_DIALOG
+    target_view: get the url of the target using reverse()  
+    use_selected: Once the check boxes go in, how many items can be selected
+        IGNORE (default)
+        TODO: integer greater than zero
+        
+    """
+    def __init__(
+        self, 
+        label,
+        target_view,
+        action_type='JUMP',
+        use_selected='IGNORE'
+    ):
+        # TODO: Add in some validation for this
+        self.label = label
+        self.target_view = target_view
+        self.action_type = action_type
+        self.use_selected = use_selected
+
+    @property
+    def dump(self):
+        """
+        Grab the values needed by the javascript to build a button and 
+        return it in a dict
+        """
+        return {
+            'label': self.label,
+            'target': self.target_view,
+            'action': self.action_type
+        }

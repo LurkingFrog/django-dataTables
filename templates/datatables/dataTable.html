@@ -29,8 +29,8 @@
     })
 </script>
 
-<form id="datatable_form_{{table_name}}">
-  {{table.as_p}}
+<form id="datatable_form_{{table_name}}" action="test" method="POST">
+  {% csrf_token %}
   <table id="datatable_display_{{table_name}}">
     <thead>
       <tr>
@@ -42,7 +42,7 @@
     </tbody>
     <tfoot>
       <tr>
-	<td> 
+	<td id='datatable_display_{{table_name}}_footer' colspan="1"> 
 	  Add / Edit / Delete
 	</td>
       </tr>
