@@ -1,0 +1,40 @@
+# Compiled Python
+*.pyc
+
+# Sqlite databases shouldn't be persistant
+*.sqlite
+*.sqlite3
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# Until I get the app packaged ignore:
+data_tables
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+
+#Translations
+*.mo
+
+#Mr Developer
+.mr.developer.cfg
+
+#Emacs dregs
+*~
+\#*\#
+.\#*

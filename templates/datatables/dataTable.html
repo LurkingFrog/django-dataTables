@@ -1,0 +1,51 @@
+<style type="text/css" id="default_css">
+    @import "{{STATIC_URL}}datatables/css/demo_table.css";
+    @import "{{STATIC_URL}}datatables/css/demo_page.css";
+    @import "{{STATIC_URL}}datatables/css/jquery.dataTables_themeroller.css"
+</style>
+
+<script type="text/javascript" 
+	src="{{STATIC_URL}}datatables/js/dynamicDataTables.js">
+</script>
+
+<!-- TODO: Change jquery and datatables to be dynamically loaded -->
+<script type="text/javascript" 
+	src="{{STATIC_URL}}datatables/js/jquery.js">
+</script>
+
+<script type="text/javascript" 
+	src="{{STATIC_URL}}datatables/js/jquery.dataTables.min.js">
+</script>
+
+<script type="text/javascript">
+//    load_required_scripts("{{STATIC_URL}}");
+    
+    $(function(){
+	load_data_table(
+	    "datatable_display_{{table_name}}",
+	    "{{table_name}}",
+	    "{{ csrf_token }}"
+	);
+    })
+</script>
+
+<form id="datatable_form_{{table_name}}">
+  {{table.as_p}}
+  <table id="datatable_display_{{table_name}}">
+    <thead>
+      <tr>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+	<td> 
+	  Add / Edit / Delete
+	</td>
+      </tr>
+    </tfoot>
+  </table>
+</form>
