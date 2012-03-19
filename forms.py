@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.utils.datastructures import SortedDict
 
 from django import forms
@@ -62,13 +64,13 @@ class JQueryDataTable(forms.Form):
                 .format(table_type, classes)
             )
 
-    def add_data(self):
+    def add_data_row(self):
         new_row = SortedDict()
         for column in self.columns:
-            if hasattr(column, 'default'):
-                new_row[column.label] = column.default
-            else:
-                new_row[column.label] = ''
+            new_row[column.label] = DTCell(
+                value=column.default_value,
+                cell_format=deepcopy(column.format)
+            )
 
         self.display_data.append(new_row)
         return new_row
@@ -104,9 +106,11 @@ class JQueryDataTable(forms.Form):
         # should work for now
         context['aaData'] = list()
         for row in self.display_data:
-            context['aaData'].append(
-                [unicode(x) for x in row.values()]
-            )
+            row_data = list()
+            for cell in row.values():
+                row_data.append(cell.render())
+    
+            context['aaData'].append(row_data)
 
         context['buttons'] = [x.dump for x in self.buttons]
 
@@ -115,15 +119,96 @@ class JQueryDataTable(forms.Form):
 
 class DTColumn(object):
     """
-    This is a column in the data table
+    This is a column in the data table. See the FormatWidget for additional options
+
+    * label: The column header that is displayed. Also used as the dictionary key
+      used to reference this cell's data.
+    * default: The default value that should be used to initialize the cell
+    * custom_render_type: A choice to say what the field should be rendered as
+       - None: Default case.  Use the raw value field
+       - LINK: Enclose the raw value in an anchor tag
+       - FORM: More advanced than the link, it takes serialized data and passes it
+            as post data.
+       - TEMPLATE: Use the django template.render to create a more advanced value
+    * custom_render_string: Contains the formatting data used if the
+            custom_render_type isn't None
+        - None: Not used
+        - LINK: the URL that should be used as the href
+        - FORM: the URL form's action should point to
+        - TEMPLATE: the template path that should used to render the new value
     """
 
-    def __init__(self, label):
+    def __init__(
+        self,
+        label,
+        default='',
+        custom_render_type=None,
+        custom_render_string=None,
+    ):
         self.label = label
-        
+        self.default_value = default
+
+        self.format =  DTColumnFormatWidget(
+            custom_render_type=custom_render_type,
+            custom_render_string=custom_render_string,
+        )
+
+            
+        # TODO: Add Form options
         # TODO: Add filter options
         # TODO: Add formatting options
-        # TODO: Add link options
+        # TODO: Add grand totals
+
+
+class DTColumnFormatWidget(object):
+    """
+    Used for building what is displayed on the screen. It adds in custom
+    formatting so the display can automatically use:
+    
+    *  Links
+    *  Custom Rendering
+    """
+
+    def __init__(
+        self,
+        custom_render_type=None,
+        custom_render_string=None,
+    ):
+        self.custom_render_type = custom_render_type
+        self.custom_render_string = custom_render_string
+
+        
+class DTCell(object):
+    """
+    Each one of these is the final data in a cell that needs to be
+    serialized and sent to the browser.
+
+    * value: The sortable value.
+    * custom_render_type: The default for this is pulled from 
+
+
+    * _rendered_value: This should not be set by the user, as it is as done
+      automatically when the JSON is calculated
+    """
+    def __init__(self, value, cell_format, custom_render_context=dict()):
+        self.value = value
+        self.format = cell_format
+        self.custom_render_context = custom_render_context
+
+    def render(self):
+        if self.format.custom_render_type is None:
+            return unicode(self.value)
+
+        elif self.format.custom_render_type == 'LINK':
+            return u'<a href="{url}">{value}</a>'.format(
+                url =self.format.custom_render_string,
+                value=self.value
+            )
+        else:
+            raise ValueError(
+                "'{0}' is either invalid or not implemented"
+                .format(self.format.custom_render_type)
+            )
 
 
 class DTButton(object):
@@ -164,3 +249,7 @@ class DTButton(object):
             'target': self.target_view,
             'action': self.action_type
         }
+
+
+
+    
