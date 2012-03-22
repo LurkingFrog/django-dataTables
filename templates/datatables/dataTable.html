@@ -19,14 +19,13 @@
 
 <script type="text/javascript">
 //    load_required_scripts("{{STATIC_URL}}");
-    
     $(function(){
 	load_data_table(
 	    "datatable_display_{{table_name}}",
 	    "{{table_name}}",
 	    "{{ csrf_token }}"
 	);
-    })
+    });
 </script>
 
 <form id="datatable_form_{{table_name}}" action="test" method="POST">

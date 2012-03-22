@@ -6,7 +6,7 @@ function load_data_table(table_id, table_type, csrf) {
 	    csrfmiddlewaretoken: csrf,
 	    table_type: table_type
         },
-	success:  function(resp){
+	success: function(resp){
 	    resp["bProcessing"] = true;
 	    $("#" + table_id).dataTable(resp);
 	    var col_count = resp['aoColumns'].length;
@@ -15,7 +15,7 @@ function load_data_table(table_id, table_type, csrf) {
 	error: function(xhr, textStatus, errorThrown) {
 	    alert("There was a 500 error: " + textStatus + ":" + errorThrown);
 	},
-	dataType: "json",
+	dataType: "json"
     });
 };
 
@@ -28,7 +28,7 @@ function build_buttons(buttons, table_id, col_count) {
     for (x in buttons) {
 	var button = buttons[x];
 	new_item = $('<button/>', {
-	    text: button['label'],   
+	    text: button['label']
 	});
 	new_item.click(
 	    function(e) {

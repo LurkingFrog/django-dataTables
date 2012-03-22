@@ -124,26 +124,18 @@ class DTColumn(object):
     * label: The column header that is displayed. Also used as the dictionary key
       used to reference this cell's data.
     * default: The default value that should be used to initialize the cell
-    * custom_render_type: A choice to say what the field should be rendered as
-       - None: Default case.  Use the raw value field
-       - LINK: Enclose the raw value in an anchor tag
-       - FORM: More advanced than the link, it takes serialized data and passes it
-            as post data.
-       - TEMPLATE: Use the django template.render to create a more advanced value
-    * custom_render_string: Contains the formatting data used if the
-            custom_render_type isn't None
-        - None: Not used
-        - LINK: the URL that should be used as the href
-        - FORM: the URL form's action should point to
-        - TEMPLATE: the template path that should used to render the new value
+    * link_url: this is the url you want the cell to link to. If left as the
+        default (None), there will be no link
+        
     """
 
     def __init__(
         self,
         label,
         default='',
-        custom_render_type=None,
+        link_url=None,
         custom_render_string=None,
+        custom_render_type=None,
     ):
         self.label = label
         self.default_value = default
@@ -184,32 +176,35 @@ class DTCell(object):
     serialized and sent to the browser.
 
     * value: The sortable value.
-    * custom_render_type: The default for this is pulled from 
-
+    * display: this is what is actually shown to the end user
 
     * _rendered_value: This should not be set by the user, as it is as done
       automatically when the JSON is calculated
     """
-    def __init__(self, value, cell_format, custom_render_context=dict()):
+
+    def __init__(
+        self,
+        value,
+        cell_format,
+        display=None,
+        link_url=None,
+        custom_render_context=dict()
+    ):
         self.value = value
+        self.display = display
         self.format = cell_format
         self.custom_render_context = custom_render_context
+        self.format.link_url = link_url
 
     def render(self):
-        if self.format.custom_render_type is None:
-            return unicode(self.value)
-
-        elif self.format.custom_render_type == 'LINK':
+        # Turn the display into a simple link
+        if self.format.link_url:
             return u'<a href="{url}">{value}</a>'.format(
-                url =self.format.custom_render_string,
+                url=self.format.link_url,
                 value=self.value
             )
-        else:
-            raise ValueError(
-                "'{0}' is either invalid or not implemented"
-                .format(self.format.custom_render_type)
-            )
-
+        
+        return unicode(self.value)
 
 class DTButton(object):
     """
